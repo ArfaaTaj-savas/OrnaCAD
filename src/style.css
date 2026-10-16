@@ -1136,10 +1136,11 @@ input:focus, select:focus, textarea:focus {
   .sidebar-tabs::-webkit-scrollbar { display: none; }
   .tab-btn { flex: 0 0 auto; padding-inline: 9px; white-space: nowrap; }
   .mobile-menu-close {
-    display: inline-flex; flex: 0 0 42px; align-items: center; justify-content: center; width: 42px; min-width: 42px;
+    display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 3px; width: auto; min-width: 58px; padding: 0 8px;
     border-left: 1px solid var(--border-color); background: var(--bg-surface-elevated); color: var(--text-primary);
-    font-size: 25px; line-height: 1; touch-action: manipulation;
+    font-size: 11px; font-weight: 700; line-height: 1; touch-action: manipulation;
   }
+  .mobile-menu-close span { font-size: 20px; font-weight: 400; }
   .mobile-menu-close:hover { color: var(--accent-gold); background: var(--bg-surface); }
   .mobile-menu-button {
     position: absolute; top: 10px; right: 10px; z-index: 25; display: inline-flex; align-items: center; gap: 7px;
