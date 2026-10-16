@@ -1,4 +1,6 @@
-# OrnaCAD 💎
+# OrnaCAD
+
+![OrnaCAD logo](public/ornacad-logo.svg)
 
 A professional in-browser CAD tool for designing zircon stone-setting sheets for CNC drilling machines.
 

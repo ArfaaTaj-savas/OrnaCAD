@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">OrnaCAD</title>
+  <desc id="desc">A gold bangle ring surrounding a ruby-cut gemstone.</desc>
+  <defs>
+    <linearGradient id="gold" x1="10" y1="8" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffe7a1"/><stop offset=".48" stop-color="#e2aa2c"/><stop offset="1" stop-color="#9d6414"/>
+    </linearGradient>
+    <linearGradient id="ruby" x1="24" y1="19" x2="40" y2="45" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff8b83"/><stop offset=".42" stop-color="#cb263c"/><stop offset="1" stop-color="#641523"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="29" fill="#15191f" stroke="#42351d" stroke-width="2"/>
+  <ellipse cx="32" cy="34" rx="21" ry="15" transform="rotate(-28 32 34)" fill="none" stroke="url(#gold)" stroke-width="4.5"/>
+  <path d="M17.6 19.1c4.1-4.9 9.4-7.8 14.4-7.8s10.3 2.9 14.4 7.8" fill="none" stroke="#ffe7a1" stroke-linecap="round" stroke-width="1.5" opacity=".75"/>
+  <path d="m32 16 11 10-11 23-11-23 11-10Z" fill="url(#ruby)" stroke="#ffe7a1" stroke-linejoin="round" stroke-width="1.8"/>
+  <path d="m21 26 11 3 11-3M32 29v20" fill="none" stroke="#ffd6a0" stroke-linejoin="round" stroke-width="1.2" opacity=".8"/>
+  <circle cx="12.5" cy="36.5" r="2" fill="#f4d477" stroke="#835616"/>
+  <circle cx="51.5" cy="29.5" r="2" fill="#f4d477" stroke="#835616"/>
+</svg>
