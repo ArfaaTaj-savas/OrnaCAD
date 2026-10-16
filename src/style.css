@@ -1126,6 +1126,33 @@ input:focus, select:focus, textarea:focus {
 .orientation-card button { width: 100%; min-height: 42px; }
 .orientation-icon { color: var(--accent-gold); font-size: 42px; line-height: 1; }
 
+.mobile-menu-button, .mobile-menu-backdrop { display: none; }
+
+@media (max-width: 860px) and (pointer: coarse) {
+  .mobile-menu-button {
+    position: absolute; top: 10px; right: 10px; z-index: 25; display: inline-flex; align-items: center; gap: 7px;
+    min-height: 40px; padding: 0 13px; border: 1px solid rgba(226,170,44,.55); border-radius: 8px;
+    background: rgba(22,27,34,.94); color: var(--text-primary); font-weight: 700; box-shadow: var(--shadow-md); touch-action: manipulation;
+  }
+  .mobile-menu-button:active { background: var(--bg-surface-elevated); }
+  .sidebar-panel {
+    position: fixed; top: 48px; right: 0; bottom: 0; z-index: 50; width: min(92vw, 390px); min-width: 0; height: auto;
+    border-top: none; border-left: 1px solid var(--border-color); box-shadow: var(--shadow-lg);
+    transform: translateX(102%); visibility: hidden; transition: transform .2s ease, visibility .2s ease;
+  }
+  #app.mobile-menu-open .sidebar-panel { transform: translateX(0); visibility: visible; }
+  .mobile-menu-backdrop {
+    position: fixed; inset: 48px 0 0; z-index: 40; display: none; width: 100%; height: auto; border: 0; border-radius: 0;
+    background: rgba(0,0,0,.45); cursor: default;
+  }
+  #app.mobile-menu-open .mobile-menu-backdrop { display: block; }
+}
+
 @media (max-width: 860px) and (orientation: portrait) and (pointer: coarse) {
   #app { min-height: 100dvh; }
+}
+
+@media (max-width: 860px) and (orientation: landscape) and (pointer: coarse) {
+  .sidebar-panel { top: 42px; }
+  .mobile-menu-backdrop { inset-block-start: 42px; }
 }

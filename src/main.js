@@ -147,6 +147,9 @@ const brassProductSelect = document.getElementById('brass-product-select');
 const brassSizeSelect = document.getElementById('brass-size-select');
 const brassLengthValue = document.getElementById('brass-length-value');
 const btnUseBrassGrid = document.getElementById('btn-use-brass-grid');
+const mobileMenuButton = document.getElementById('btn-mobile-menu');
+const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+const mobileSidebar = document.getElementById('mobile-sidebar');
 const orientationAssist = document.getElementById('orientation-assist');
 const orientationMessage = document.getElementById('orientation-message');
 const orientationLockButton = document.getElementById('orientation-lock');
@@ -257,6 +260,26 @@ orientationAssist.addEventListener('keydown', event => {
 mobileWorkspaceQuery.addEventListener('change', updateOrientationAssist);
 portraitQuery.addEventListener('change', updateOrientationAssist);
 window.addEventListener('resize', updateOrientationAssist);
+
+function setMobileMenuOpen(open) {
+  const isMobile = mobileWorkspaceQuery.matches;
+  const shouldOpen = Boolean(open && isMobile);
+  document.getElementById('app').classList.toggle('mobile-menu-open', shouldOpen);
+  mobileMenuButton.setAttribute('aria-expanded', String(shouldOpen));
+  mobileSidebar.setAttribute('aria-hidden', String(isMobile && !shouldOpen));
+  if (shouldOpen) mobileSidebar.querySelector('.tab-btn')?.focus();
+  else if (isMobile) mobileMenuButton.focus();
+}
+
+mobileMenuButton.addEventListener('click', () => setMobileMenuOpen(mobileMenuButton.getAttribute('aria-expanded') !== 'true'));
+mobileMenuBackdrop.addEventListener('click', () => setMobileMenuOpen(false));
+mobileSidebar.addEventListener('keydown', event => {
+  if (event.key === 'Escape') setMobileMenuOpen(false);
+});
+mobileWorkspaceQuery.addEventListener('change', event => {
+  if (!event.matches) setMobileMenuOpen(false);
+});
+mobileSidebar.setAttribute('aria-hidden', String(mobileWorkspaceQuery.matches));
 
 function initializeApp() {
   // Restore a saved project, or begin with one empty 24-row design band.

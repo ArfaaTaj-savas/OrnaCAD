@@ -95,12 +95,16 @@ Keep the browser based bangle design editor reliable when creating bangles and v
 
 19. Prefer landscape orientation for OrnaCAD on phones and tablets, and give the editor a usable side-by-side layout while landscape.
 20. Request a landscape orientation lock on launch where the browser allows it; for browsers requiring a user gesture, provide a fullscreen landscape action and a manual-rotation fallback.
+21. On phones, hide the settings sidebar by default and provide a menu button and dismissible drawer so the design canvas remains visible.
 
 **Additional Success Criteria**
 - [x] Installed app manifest requests landscape orientation.
 - [x] Touch devices in portrait receive an accessible landscape prompt with automatic, manual, and continue-in-portrait paths.
 - [x] Touch devices in landscape use a full-height canvas with compact tool rail and sidebar.
+- [x] Phone settings tabs are hidden behind a Menu button and open in a dismissible side drawer.
 - [x] `npm test` and `npm run build` succeed.
+
+**Verification evidence:** `npm test` exit code 0. `npm run build` exit code 0. Mobile drawer and orientation behavior were reviewed in the responsive rules and event wiring; an in-app browser screenshot could not be captured because local preview URLs are unreachable in that browser.
 
 **Verification evidence:** Manifest parsed successfully and reports `display: standalone`, `orientation: landscape`. `npm test` exit code 0. `npm run build` exit code 0. Physical-device orientation behavior still depends on the browser and device auto-rotate settings; the web UI could not be opened in the in-app browser for screenshot inspection.
 
