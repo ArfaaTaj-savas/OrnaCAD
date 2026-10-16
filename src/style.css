@@ -1127,8 +1127,20 @@ input:focus, select:focus, textarea:focus {
 .orientation-icon { color: var(--accent-gold); font-size: 42px; line-height: 1; }
 
 .mobile-menu-button, .mobile-menu-backdrop { display: none; }
+.sidebar-header { display: contents; }
+.mobile-menu-close { display: none; }
 
 @media (max-width: 860px) {
+  .sidebar-header { display: flex; align-items: stretch; min-width: 0; }
+  .sidebar-tabs { flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .sidebar-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { flex: 0 0 auto; padding-inline: 9px; white-space: nowrap; }
+  .mobile-menu-close {
+    display: inline-flex; flex: 0 0 42px; align-items: center; justify-content: center; width: 42px; min-width: 42px;
+    border-left: 1px solid var(--border-color); background: var(--bg-surface-elevated); color: var(--text-primary);
+    font-size: 25px; line-height: 1; touch-action: manipulation;
+  }
+  .mobile-menu-close:hover { color: var(--accent-gold); background: var(--bg-surface); }
   .mobile-menu-button {
     position: absolute; top: 10px; right: 10px; z-index: 25; display: inline-flex; align-items: center; gap: 7px;
     min-height: 40px; padding: 0 13px; border: 1px solid rgba(226,170,44,.55); border-radius: 8px;
