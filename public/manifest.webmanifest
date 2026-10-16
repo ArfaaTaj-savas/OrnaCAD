@@ -1,0 +1,15 @@
+{
+  "id": ".",
+  "name": "OrnaCAD — Bangle Stone Setting CAD",
+  "short_name": "OrnaCAD",
+  "description": "Design bangle stone layouts on phone, tablet, or desktop.",
+  "start_url": ".",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0d1117",
+  "theme_color": "#161b22",
+  "icons": [
+    { "src": "./ornacad-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

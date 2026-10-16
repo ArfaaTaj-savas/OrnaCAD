@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <title>OrnaCAD — Bangle Stone Setting CAD</title>
     <meta name="description" content="Design zircon stone-setting sheets for CNC bangle drilling. Real-time hexagonal packing, CorelDRAW SVG export, and modal G-code .tap drill files." />
     <link rel="icon" type="image/svg+xml" href="/ornacad-logo.svg" />
@@ -124,7 +125,7 @@
 
         <!-- Center Canvas Viewport -->
         <section class="canvas-viewport" id="viewport-container" aria-label="Stone setting canvas">
-          <canvas id="bangle-canvas"></canvas>
+          <canvas id="bangle-canvas" tabindex="-1" aria-label="Bangle stone design canvas"></canvas>
 
           <!-- Floating Precision HUD -->
           <div class="floating-hud">
@@ -757,6 +758,16 @@
       </div>
 
     </div>
+
+    <section id="orientation-assist" class="orientation-assist" role="dialog" aria-modal="true" aria-labelledby="orientation-title" hidden>
+      <div class="orientation-card">
+        <div class="orientation-icon" aria-hidden="true">↻</div>
+        <h1 id="orientation-title">Landscape workspace</h1>
+        <p id="orientation-message">OrnaCAD works best in landscape on phones and tablets.</p>
+        <button id="orientation-lock" class="btn-primary" type="button">Try landscape mode</button>
+        <button id="orientation-dismiss" class="btn-secondary" type="button">Continue in portrait</button>
+      </div>
+    </section>
 
     <!-- Main Module Application -->
     <script type="module" src="/src/main.js"></script>

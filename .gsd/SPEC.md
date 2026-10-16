@@ -91,6 +91,19 @@ Keep the browser based bangle design editor reliable when creating bangles and v
 
 **Verification evidence:** `npm test` exit code 0, including locked sizing, legacy JSON, clone/round-trip, and switch undo/redo regression coverage. `npm run build` exit code 0. Browser screenshot verification was unavailable: the app did not load in the in-app browser (`ERR_CONNECTION_TIMED_OUT` on 127.0.0.1:5174; existing 5173 tab reported connection refused).
 
+## Mobile landscape workspace (2026-10-16)
+
+19. Prefer landscape orientation for OrnaCAD on phones and tablets, and give the editor a usable side-by-side layout while landscape.
+20. Request a landscape orientation lock on launch where the browser allows it; for browsers requiring a user gesture, provide a fullscreen landscape action and a manual-rotation fallback.
+
+**Additional Success Criteria**
+- [x] Installed app manifest requests landscape orientation.
+- [x] Touch devices in portrait receive an accessible landscape prompt with automatic, manual, and continue-in-portrait paths.
+- [x] Touch devices in landscape use a full-height canvas with compact tool rail and sidebar.
+- [x] `npm test` and `npm run build` succeed.
+
+**Verification evidence:** Manifest parsed successfully and reports `display: standalone`, `orientation: landscape`. `npm test` exit code 0. `npm run build` exit code 0. Physical-device orientation behavior still depends on the browser and device auto-rotate settings; the web UI could not be opened in the in-app browser for screenshot inspection.
+
 **Verification evidence:**
 - `npm test` exit code 0; hand-set acceptance passed: 3120 filled → 3087 under the Triangle mask → 3120 restored after moving it away; TAP/SVG masks, exact Pear bounds, 90° Rectangle bounds, JSON and legacy load, and undo/redo passed.
 - `npm run build` exit code 0. The in-app browser inspection was blocked by the browser URL security policy during this turn.

@@ -147,6 +147,10 @@ const brassProductSelect = document.getElementById('brass-product-select');
 const brassSizeSelect = document.getElementById('brass-size-select');
 const brassLengthValue = document.getElementById('brass-length-value');
 const btnUseBrassGrid = document.getElementById('btn-use-brass-grid');
+const orientationAssist = document.getElementById('orientation-assist');
+const orientationMessage = document.getElementById('orientation-message');
+const orientationLockButton = document.getElementById('orientation-lock');
+const orientationDismissButton = document.getElementById('orientation-dismiss');
 
 // Quick Download Buttons (Layout tab)
 const btnQuickPng = document.getElementById('btn-quick-png');
@@ -186,6 +190,73 @@ let pendingSizeChange = null;
 // Touch tracking for pinch-zoom
 let touchStartDist = 0;
 let touchStartZoom = 1;
+let orientationAssistDismissed = false;
+
+const mobileWorkspaceQuery = window.matchMedia('(max-width: 860px) and (pointer: coarse)');
+const touchDeviceQuery = window.matchMedia('(pointer: coarse)');
+const portraitQuery = window.matchMedia('(orientation: portrait)');
+
+function updateOrientationAssist() {
+  const show = mobileWorkspaceQuery.matches && portraitQuery.matches && !orientationAssistDismissed;
+  const wasHidden = orientationAssist.hidden;
+  orientationAssist.hidden = !show;
+  document.getElementById('app').inert = show;
+  if (show && wasHidden) orientationLockButton.focus();
+  if (!show && !wasHidden && orientationAssist.contains(document.activeElement)) canvasEl.focus();
+}
+
+async function requestLandscapeMode() {
+  let enteredFullscreen = false;
+  try {
+    if (!screen.orientation || typeof screen.orientation.lock !== 'function') {
+      throw new Error('Orientation lock is unavailable in this browser. Rotate your device to landscape.');
+    }
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+      enteredFullscreen = Boolean(document.fullscreenElement);
+    }
+    await screen.orientation.lock('landscape');
+  } catch (error) {
+    if (enteredFullscreen && document.fullscreenElement) {
+      try { await document.exitFullscreen(); } catch (_) {}
+    }
+    orientationMessage.textContent = error.message?.includes('unavailable')
+      ? error.message
+      : 'This browser could not rotate automatically. Turn your device sideways and make sure auto-rotate is enabled.';
+  }
+  updateOrientationAssist();
+}
+
+async function initializeDeviceOrientation() {
+  // Installed apps can honor the landscape manifest orientation at launch.
+  // Try the runtime lock as well; browsers that require a user gesture will reject harmlessly.
+  if (touchDeviceQuery.matches) {
+    try { await screen.orientation?.lock?.('landscape'); } catch (_) {}
+  }
+  updateOrientationAssist();
+}
+
+orientationLockButton.addEventListener('click', requestLandscapeMode);
+orientationDismissButton.addEventListener('click', () => {
+  orientationAssistDismissed = true;
+  updateOrientationAssist();
+});
+orientationAssist.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    orientationAssistDismissed = true;
+    updateOrientationAssist();
+    return;
+  }
+  if (event.key === 'Tab') {
+    const focusable = [orientationLockButton, orientationDismissButton];
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+});
+mobileWorkspaceQuery.addEventListener('change', updateOrientationAssist);
+portraitQuery.addEventListener('change', updateOrientationAssist);
+window.addEventListener('resize', updateOrientationAssist);
 
 function initializeApp() {
   // Restore a saved project, or begin with one empty 24-row design band.
@@ -1249,4 +1320,5 @@ function setupEventListeners() {
 }
 
 // Start application
+initializeDeviceOrientation();
 initializeApp();
