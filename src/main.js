@@ -195,12 +195,12 @@ let touchStartDist = 0;
 let touchStartZoom = 1;
 let orientationAssistDismissed = false;
 
-const mobileWorkspaceQuery = window.matchMedia('(max-width: 860px) and (pointer: coarse)');
+const mobileWorkspaceQuery = window.matchMedia('(max-width: 860px)');
 const touchDeviceQuery = window.matchMedia('(pointer: coarse)');
 const portraitQuery = window.matchMedia('(orientation: portrait)');
 
 function updateOrientationAssist() {
-  const show = mobileWorkspaceQuery.matches && portraitQuery.matches && !orientationAssistDismissed;
+  const show = mobileWorkspaceQuery.matches && touchDeviceQuery.matches && portraitQuery.matches && !orientationAssistDismissed;
   const wasHidden = orientationAssist.hidden;
   orientationAssist.hidden = !show;
   document.getElementById('app').inert = show;
