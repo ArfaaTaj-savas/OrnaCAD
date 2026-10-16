@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>OrnaCAD — Bangle Stone Setting CAD</title>
+    <meta name="description" content="Design zircon stone-setting sheets for CNC bangle drilling. Real-time hexagonal packing, CorelDRAW SVG export, and modal G-code .tap drill files." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e2aa2c'><circle cx='12' cy='12' r='10'/></svg>" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top Navigation Bar -->
+      <header class="app-header">
+        <div class="brand-section">
+          <div class="brand-icon">💎</div>
+          <div>
+            <span class="brand-title">OrnaCAD</span>
+            <span class="brand-tag">CNC CAD</span>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <div class="size-selector-group">
+            <label for="size-select" class="size-selector-label">Bangle Size:</label>
+            <select id="size-select" class="size-select" aria-label="Bangle size selector">
+              <option value="2.4" selected>Size 2.4 (130 stones)</option>
+              <option value="2.6">Size 2.6 (134 stones)</option>
+              <option value="2.8">Size 2.8 (140 stones)</option>
+              <option value="2.10">Size 2.10 (150 stones)</option>
+            </select>
+          </div>
+
+          <button id="btn-undo" class="btn-icon-header" title="Undo (Ctrl+Z)" disabled>
+            <span>↩ Undo</span>
+          </button>
+          <button id="btn-redo" class="btn-icon-header" title="Redo (Ctrl+Y)" disabled>
+            <span>↪ Redo</span>
+          </button>
+        </div>
+
+        <div class="header-right">
+          <button id="btn-header-download" class="btn-primary" style="padding: 6px 14px; gap: 6px; font-size: 12px; display: inline-flex; align-items: center; cursor: pointer;" title="Open Download & Export Center">
+            <span>⬇️ Download / Export ▾</span>
+          </button>
+          <button id="btn-new-design" class="btn-secondary" type="button" title="Start a fresh blank design">＋ New Design</button>
+
+          <div class="autosave-badge" id="autosave-badge" title="Automatic browser storage save status">
+            <span class="autosave-dot"></span>
+            <span id="autosave-text">Autosaved</span>
+          </div>
+
+          <button id="btn-theme-toggle" class="btn-icon-header" title="Toggle Light/Dark Theme">
+            <span id="theme-icon">🌙</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Workspace -->
+      <main class="main-workspace">
+        <!-- Left Tool Rail -->
+        <aside class="tool-rail" aria-label="Design tools">
+          <div class="tool-group">
+            <button class="tool-btn active" data-tool="paint" id="tool-paint" title="Paint (P)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z"/><path d="M9 8c-2 3-4 3.5-7 4l8 8c.5-3 1-5 4-7"/><path d="M14.5 17.5 4.5 7.5"/></svg>
+              <span class="tool-hotkey">P</span>
+            </button>
+            <button class="tool-btn" data-tool="erase" id="tool-erase" title="Erase - sets empty hole (E)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+              <span class="tool-hotkey">E</span>
+            </button>
+            <button class="tool-btn" data-tool="fill" id="tool-fill" title="Flood Fill Hex Area (F)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"/><path d="m5 2 5 5"/><path d="M2 13h15"/><path d="M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z"/></svg>
+              <span class="tool-hotkey">F</span>
+            </button>
+            <button class="tool-btn" data-tool="line" id="tool-line" title="Line Tool (L)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20 20 4"/></svg>
+              <span class="tool-hotkey">L</span>
+            </button>
+            <button class="tool-btn" data-tool="rectangle" id="tool-rectangle" title="Rectangle Box Tool (R)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+              <span class="tool-hotkey">R</span>
+            </button>
+            <button class="tool-btn" data-tool="picker" id="tool-picker" title="Pick Colour Eyedropper (I)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 22 1-1h3l9-9"/><path d="M9.5 15.5 16 9"/><path d="m14 5 3-3a2.12 2.12 0 0 1 3 3l-3 3"/><path d="m19 8-6 6"/></svg>
+              <span class="tool-hotkey">I</span>
+            </button>
+            <button class="tool-btn" data-tool="move" id="tool-move" title="Pan / Move Canvas (M or Space+Drag)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 9-3 3 3 3"/><path d="m9 5 3-3 3 3"/><path d="m15 19-3 3-3-3"/><path d="m19 9 3 3-3 3"/><path d="M2 12h20"/><path d="M12 2v20"/></svg>
+              <span class="tool-hotkey">M</span>
+            </button>
+            <button class="tool-btn" data-tool="handset" id="tool-handset" title="Select and move hand-set stones">
+              <span style="font-size:20px">◇</span><span class="tool-hotkey">S</span>
+            </button>
+          </div>
+
+          <div class="tool-group-divider"></div>
+
+          <!-- Stone Colour Swatches -->
+          <div class="tool-group">
+            <button class="color-swatch-btn swatch-green active" data-color="1" id="swatch-green" title="Green Zircon (1)">
+              <span class="swatch-badge">1</span>
+            </button>
+            <button class="color-swatch-btn swatch-white" data-color="2" id="swatch-white" title="White Zircon (2)">
+              <span class="swatch-badge">2</span>
+            </button>
+            <button class="color-swatch-btn swatch-gold" data-color="3" id="swatch-gold" title="Gold Zircon (3)">
+              <span class="swatch-badge">3</span>
+            </button>
+            <button class="color-swatch-btn swatch-ruby" data-color="4" id="swatch-ruby" title="Ruby Red Zircon (4)">
+              <span class="swatch-badge">4</span>
+            </button>
+          </div>
+
+          <div class="tool-group-divider"></div>
+
+          <!-- Brush Size Selector -->
+          <div class="tool-group">
+            <button class="brush-size-btn" id="btn-brush-size" title="Cycle Brush Size (1, 2, 3, 5, 8 stones)">
+              <span id="brush-size-label">1 st</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- Center Canvas Viewport -->
+        <section class="canvas-viewport" id="viewport-container" aria-label="Stone setting canvas">
+          <canvas id="bangle-canvas"></canvas>
+
+          <!-- Floating Precision HUD -->
+          <div class="floating-hud">
+            <div class="hud-pill">
+              <span class="hud-coord-item">
+                <span>X:</span>
+                <strong id="hud-x-mm">150.000 mm</strong>
+              </span>
+              <span class="hud-coord-item">
+                <span>Y:</span>
+                <strong id="hud-y-mm">124.500 mm</strong>
+              </span>
+              <span class="hud-coord-item" style="border-left: 1px solid var(--border-color); padding-left: 8px;">
+                <span id="hud-bangle-info">B01 (6R)</span>
+              </span>
+              <span class="hud-coord-item">
+                <span id="hud-cell-info">Row: 0 | Stone: 0</span>
+              </span>
+            </div>
+
+            <div class="hud-controls-group">
+              <button id="btn-fit-sheet" class="hud-btn" title="Fit entire 300x300mm sheet into view">
+                Fit Sheet
+              </button>
+              <button id="btn-fit-bangle" class="hud-btn" title="Fit selected bangle into view">
+                Fit Bangle
+              </button>
+              <button id="btn-zoom-out" class="hud-btn" title="Zoom Out (-)">-</button>
+              <span id="hud-zoom-level" class="hud-btn" style="cursor: default;">100%</span>
+              <button id="btn-zoom-in" class="hud-btn" title="Zoom In (+)">+</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Panel (Tabs for Layout, Tracing, Stamps, Export, CNC) -->
+        <aside class="sidebar-panel" aria-label="Bangles layout and export options">
+          <nav class="sidebar-tabs" role="tablist">
+            <button class="tab-btn active" data-tab="tab-layout" role="tab" aria-selected="true">Layout</button>
+            <button class="tab-btn" data-tab="tab-tracing" role="tab" aria-selected="false">Tracing</button>
+            <button class="tab-btn" data-tab="tab-stamps" role="tab" aria-selected="false">Motifs</button>
+            <button class="tab-btn" data-tab="tab-stones" role="tab" aria-selected="false">Stones</button>
+            <button class="tab-btn" data-tab="tab-export" role="tab" aria-selected="false">Export</button>
+            <button class="tab-btn" data-tab="tab-limits" role="tab" aria-selected="false">CNC Info</button>
+          </nav>
+
+          <!-- Tab 1: Layout & Bangles -->
+          <div id="tab-layout" class="sidebar-tab-content">
+            <div class="panel-card workflow-card">
+              <span class="card-title">Start designing</span>
+              <p>Choose a Brass OK size, add a band, then draw with stones or place a repeating motif. Upload your reference in Tracing.</p>
+            </div>
+
+            <div class="panel-card brass-size-card">
+              <div class="card-title-row"><span class="card-title">Brass OK Size Box</span><span class="brand-tag">mm</span></div>
+              <div class="brass-size-grid">
+                <label>Product
+                  <select id="brass-product-select" aria-label="Brass product type">
+                    <option value="KADA">KADA</option><option value="BB">BB</option><option value="CP">CP</option><option value="CHURI">CHURI</option>
+                  </select>
+                </label>
+                <label>Size
+                  <select id="brass-size-select" aria-label="Brass size">
+                    <option value="2/4">2/4</option><option value="2/6">2/6</option><option value="2/8">2/8</option><option value="2/10">2/10</option>
+                  </select>
+                </label>
+              </div>
+              <div class="brass-result"><span>Brass OK length</span><strong id="brass-length-value">215 mm</strong></div>
+              <button id="btn-use-brass-grid" class="btn-secondary" type="button">Use matching grid size</button>
+              <small>Reference length from your Brass OK chart. The grid size selection opens the existing resize options.</small>
+            </div>
+
+            <!-- Quick One-Click Downloads Card -->
+            <div class="panel-card" style="border: 1px solid var(--accent-gold); background: rgba(226, 170, 44, 0.07);">
+              <div class="card-title-row">
+                <span class="card-title" style="color: var(--accent-gold);">⚡ One-Click Downloads</span>
+                <span style="font-size: 10px; color: var(--accent-gold); font-weight: bold; background: rgba(226, 170, 44, 0.15); padding: 2px 6px; border-radius: 4px;">PNG &amp; TAP</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button id="btn-quick-png" class="btn-primary" style="font-size: 11px; padding: 8px; justify-content: center; gap: 4px; cursor: pointer;" title="Download design as high-resolution PNG image">
+                  <span>📸 Image (.png)</span>
+                </button>
+                <button id="btn-quick-tap" class="btn-primary" style="font-size: 11px; padding: 8px; justify-content: center; gap: 4px; background: linear-gradient(135deg, #106238 0%, #1e8e52 100%); color: #fff; cursor: pointer;" title="Download CNC drill file (.tap)">
+                  <span>⚙️ Drill (.tap)</span>
+                </button>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                <button id="btn-quick-sheet-zip" class="btn-secondary" style="font-size: 11px; padding: 6px; justify-content: center; cursor: pointer;" title="Download Sheet Zip (3 .tap files)">
+                  📦 Sheet Zip
+                </button>
+                <button id="btn-quick-svg" class="btn-secondary" style="font-size: 11px; padding: 6px; justify-content: center; cursor: pointer;" title="Download CorelDRAW SVG vector file">
+                  🎨 Corel SVG
+                </button>
+              </div>
+            </div>
+
+            <!-- Sheet Height Meter -->
+            <div class="panel-card">
+              <div class="card-title-row">
+                <span class="card-title">Sheet Height Meter</span>
+                <span id="height-meter-val" style="font-family: var(--font-mono); font-weight: bold;">272.37 / 272.37 mm</span>
+              </div>
+              <div class="height-meter-box">
+                <div class="progress-bar-bg">
+                  <div id="height-meter-bar" class="progress-bar-fill" style="width: 100%;"></div>
+                </div>
+                <div id="height-alert-box" class="alert-height-exceeded" style="display: none;">
+                  ⚠️ Sheet height limit (272.37 mm) exceeded! Reduce rows or gap.
+                </div>
+              </div>
+            </div>
+
+            <!-- Gap & Spread Controls -->
+            <div class="panel-card">
+              <div class="card-title-row">
+                <span class="card-title">Bangle Spacing Gap</span>
+                <span id="gap-display-val" style="font-family: var(--font-mono); font-size: 11px;">2.685 mm</span>
+              </div>
+              <div class="gap-control-row">
+                <input type="range" id="gap-slider" class="gap-slider" min="0" max="10" step="0.05" value="2.685" aria-label="Bangle gap slider" />
+                <input type="number" id="gap-input" class="gap-num-input" min="0" max="15" step="0.001" value="2.685" aria-label="Bangle gap input in mm" />
+              </div>
+              <button id="btn-spread-gaps" class="btn-secondary" title="Evenly adjust gaps so total bangles height fills exactly 272.37 mm">
+                📐 Spread Gaps to Fill 272.37 mm
+              </button>
+            </div>
+
+            <!-- Bangle Stack List -->
+            <div class="panel-card">
+              <div class="card-title-row">
+                <span class="card-title">Bangles (<span id="bangles-count-tag">18</span>)</span>
+                <button id="btn-add-bangle" class="btn-secondary" style="padding: 3px 8px; font-size: 11px;">
+                  + Add Bangle
+                </button>
+              </div>
+              <div id="bangle-list" class="bangle-list-container">
+                <!-- Dynamically rendered bangle items -->
+              </div>
+            </div>
+
+            <!-- Symmetry & Bangle Actions -->
+            <div class="panel-card">
+              <span class="card-title">Drawing Symmetry & Tools</span>
+              <div class="symmetry-toggle-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="chk-mirror-lr" />
+                  <span>Mirror Left-to-Right (X = 150 mm)</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="chk-mirror-tb" />
+                  <span>Mirror Top-to-Bottom</span>
+                </label>
+                <div class="info-note">
+                  ℹ️ Top-to-bottom mirror is exact only on bangles with an odd row count.
+                </div>
+              </div>
+
+              <div class="grid-actions-group" style="margin-top: 8px;">
+                <button id="btn-copy-lr-sel" class="btn-secondary" title="Copy left half to right half for selected bangle">
+                  Copy L → R (Bangle)
+                </button>
+                <button id="btn-copy-rl-sel" class="btn-secondary" title="Copy right half to left half for selected bangle">
+                  Copy R → L (Bangle)
+                </button>
+                <button id="btn-copy-lr-all" class="btn-secondary" title="Copy left half to right half for all bangles">
+                  Copy L → R (All)
+                </button>
+                <button id="btn-copy-rl-all" class="btn-secondary" title="Copy right half to left half for all bangles">
+                  Copy R → L (All)
+                </button>
+                <button id="btn-fill-bangle" class="btn-secondary" title="Fill entire selected bangle with active colour">
+                  Fill Bangle Color
+                </button>
+                <button id="btn-clear-bangle" class="btn-secondary" title="Clear all holes in selected bangle">
+                  Clear Bangle
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Stone Counts -->
+            <div class="panel-card">
+              <span class="card-title">Live Stone Counts</span>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Selected Bangle:</div>
+              <div class="counts-grid">
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot green"></span>Green:</span>
+                  <span id="count-sel-green" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot white"></span>White:</span>
+                  <span id="count-sel-white" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot gold"></span>Gold:</span>
+                  <span id="count-sel-gold" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot ruby"></span>Ruby:</span>
+                  <span id="count-sel-ruby" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title">Total Drilled:</span>
+                  <span id="count-sel-total" class="count-pill-val">0</span>
+                </div>
+              </div>
+
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; margin-bottom: 4px;">Whole Sheet:</div>
+              <div class="counts-grid">
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot green"></span>Green:</span>
+                  <span id="count-sheet-green" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot white"></span>White:</span>
+                  <span id="count-sheet-white" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot gold"></span>Gold:</span>
+                  <span id="count-sheet-gold" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title"><span class="count-pill-dot ruby"></span>Ruby:</span>
+                  <span id="count-sheet-ruby" class="count-pill-val">0</span>
+                </div>
+                <div class="count-pill">
+                  <span class="count-pill-title">Sheet Total:</span>
+                  <span id="count-sheet-total" class="count-pill-val">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Tracing Reference Picture -->
+          <div id="tab-tracing" class="sidebar-tab-content" style="display: none;">
+            <div class="panel-card">
+              <span class="card-title">Reference Picture Tracing</span>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Upload a hand-drawn sketch, CAD diagram, or photo to place under the stones for precision tracing.
+              </p>
+
+              <input type="file" id="trace-file-input" accept="image/*" style="display: none;" />
+              <button id="btn-upload-trace" class="btn-secondary">
+                📁 Upload Reference Picture
+              </button>
+
+              <div id="trace-controls" style="display: none; flex-direction: column; gap: 10px; margin-top: 6px;">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="trace-visible" checked />
+                  <span>Show Reference Picture</span>
+                </label>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                    <span>Opacity:</span>
+                    <span id="trace-opacity-val">50%</span>
+                  </div>
+                  <input type="range" id="trace-opacity" min="0.05" max="1" step="0.05" value="0.5" style="width: 100%;" />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <div>
+                    <label style="font-size: 10px; color: var(--text-muted);">Width (mm):</label>
+                    <input type="number" id="trace-width" value="300" min="10" max="600" step="1" style="width: 100%;" />
+                  </div>
+                  <div>
+                    <label style="font-size: 10px; color: var(--text-muted);">Height (mm):</label>
+                    <input type="number" id="trace-height" value="300" min="10" max="600" step="1" style="width: 100%;" />
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <div>
+                    <label style="font-size: 10px; color: var(--text-muted);">Left X (mm):</label>
+                    <input type="number" id="trace-x" value="0" min="-100" max="400" step="1" style="width: 100%;" />
+                  </div>
+                  <div>
+                    <label style="font-size: 10px; color: var(--text-muted);">Top Y (mm):</label>
+                    <input type="number" id="trace-y" value="0" min="-100" max="400" step="1" style="width: 100%;" />
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 6px;">
+                  <button id="btn-reset-trace" class="btn-secondary" style="flex: 1;">Fit Usable Area</button>
+                  <button id="btn-remove-trace" class="btn-secondary danger" style="color: var(--accent-red);">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stone Opacity and Empty Dots View Settings -->
+            <div class="panel-card">
+              <span class="card-title">Stone Visibility Settings</span>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                  <span>Stone Opacity (for tracing overlay):</span>
+                  <span id="stone-opacity-val">100%</span>
+                </div>
+                <input type="range" id="stone-opacity-slider" min="0.2" max="1" step="0.05" value="1.0" style="width: 100%;" />
+              </div>
+
+              <label class="checkbox-label" style="margin-top: 6px;">
+                <input type="checkbox" id="chk-empty-dots" checked />
+                <span>Show faint dots at empty hole positions</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tab 3: Motifs & Stamps -->
+          <div id="tab-stamps" class="sidebar-tab-content" style="display: none;">
+            <div class="panel-card">
+              <span class="card-title">Jewellery Motif Stamps</span>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Select a motif stamp, then click on any bangle row to place it instantly.
+              </p>
+              <div class="motif-transform-controls" aria-label="Motif orientation controls">
+                <button id="motif-rotate" class="btn-secondary" type="button" title="Rotate stamp 90 degrees">Rotate 90°</button>
+                <button id="motif-flip-x" class="btn-secondary" type="button" aria-pressed="false">Flip ↔</button>
+                <button id="motif-flip-y" class="btn-secondary" type="button" aria-pressed="false">Flip ↕</button>
+                <button id="motif-reset" class="btn-secondary" type="button">Reset</button>
+                <span id="motif-orientation" class="motif-orientation">0°</span>
+              </div>
+              <div id="motifs-container" class="motifs-grid">
+                <!-- Dynamically populated stamps -->
+              </div>
+              <button id="btn-repeat-motif" class="btn-primary motif-repeat-button" type="button" disabled>Repeat motif across selected band</button>
+            </div>
+          </div>
+
+          <div id="tab-stones" class="sidebar-tab-content" style="display: none;">
+            <div class="panel-card">
+              <span class="card-title">Hand-set stones</span>
+              <p class="stone-library-note">Choose a stone, then click the canvas to place it. Select a placed stone to move or edit it.</p>
+              <div id="handset-library" class="handset-library"></div>
+            </div>
+            <div class="panel-card">
+              <span class="card-title">Placement and clearance</span>
+              <label class="checkbox-label"><input type="checkbox" id="snap-stone-centers" checked><span>Snap centre to nearest hole</span></label>
+              <label class="checkbox-label"><input type="checkbox" id="snap-stone-rotation" checked><span>Snap rotation to 15°</span></label>
+              <label class="field-label" for="stone-clearance">Hole clearance (mm)</label>
+              <input id="stone-clearance" type="number" min="0.5" max="1.5" step="0.05" value="0.85" class="full-width-input">
+            </div>
+            <div class="panel-card">
+              <span class="card-title">Stone sizes (mm)</span>
+              <div id="stone-sizes-table" class="stone-sizes-table"></div>
+              <p class="stone-library-note">Estimated sizes. Measure your stones and replace these values.</p>
+            </div>
+            <div class="panel-card">
+              <span class="card-title">Selected stone</span>
+              <div class="shape-properties">
+                <label>X <input id="shape-x" type="number" step="0.1"></label>
+                <label>Y <input id="shape-y" type="number" step="0.1"></label>
+                <label>Length <input id="shape-length" type="number" min="0.1" step="0.1"></label>
+                <label>Width <input id="shape-width" type="number" min="0.1" step="0.1"></label>
+                <label>Rotation <input id="shape-rotation" type="number" step="1"></label>
+              </div>
+              <div class="motif-transform-controls">
+                <button id="shape-mirror" class="btn-secondary" type="button">Mirror across axis</button>
+                <button id="shape-delete" class="btn-secondary danger" type="button">Delete</button>
+              </div>
+              <label class="field-label" for="shape-repeat-count">Repeat copies and spacing (mm)</label>
+              <div class="shape-properties"><input id="shape-repeat-count" type="number" min="1" max="100" value="2"><input id="shape-repeat-spacing" type="number" step="0.1" value="15"></div>
+              <button id="shape-repeat" class="btn-secondary" type="button">Repeat selected stone</button>
+              <label class="field-label" for="ring-color">Ring colour</label>
+              <select id="ring-color" class="full-width-input"><option value="1">Green</option><option value="2">White</option><option value="3" selected>Gold</option></select>
+              <button id="shape-ring" class="btn-secondary" type="button">Add ring of stones around selected stone</button>
+            </div>
+          </div>
+
+          <!-- Tab 4: Export & CNC Drill Files -->
+          <div id="tab-export" class="sidebar-tab-content" style="display: none;">
+            <div class="panel-card">
+              <span class="card-title">Hand-set stones needed</span>
+              <div id="handset-counts" class="handset-counts"></div>
+            </div>
+            <!-- High-Res PNG Image Export -->
+            <div class="panel-card" style="border: 1px solid var(--accent-gold); background: rgba(226, 170, 44, 0.05);">
+              <div class="card-title-row">
+                <span class="card-title" style="color: var(--accent-gold);">📸 Image Export (.png)</span>
+                <span class="brand-tag">300 DPI</span>
+              </div>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Download high-resolution 300 × 300 mm PNG image with gemstone shading, rulers, and bangle labels.
+              </p>
+              <button id="btn-export-png" class="btn-primary" style="width: 100%; cursor: pointer;">
+                📸 Download Image (.png)
+              </button>
+            </div>
+
+            <!-- Single .TAP Drill Files (Direct Download) -->
+            <div class="panel-card">
+              <span class="card-title">⚙️ Single .TAP Drill Files (Direct Download)</span>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Download individual modal G-code .tap files directly without unzipping.
+              </p>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <button id="btn-tap-sheet-gold" class="btn-secondary" style="color: var(--accent-gold); font-weight: bold; cursor: pointer;">
+                  📥 Gold Sheet .tap
+                </button>
+                <button id="btn-tap-sheet-white" class="btn-secondary" style="font-weight: bold; cursor: pointer;">
+                  📥 White Sheet .tap
+                </button>
+                <button id="btn-tap-sheet-green" class="btn-secondary" style="color: #2ea043; font-weight: bold; cursor: pointer;">
+                  📥 Green Sheet .tap
+                </button>
+                <button id="btn-tap-sheet-ruby" class="btn-secondary" style="color: #e11d48; font-weight: bold; cursor: pointer;">
+                  📥 Ruby Sheet .tap
+                </button>
+                <button id="btn-tap-sel-bangle" class="btn-secondary" style="font-weight: bold; cursor: pointer;">
+                  📥 Active Bangle .tap
+                </button>
+              </div>
+            </div>
+
+            <!-- CNC G-Code Zip Exports -->
+            <div class="panel-card">
+              <span class="card-title">CNC Drill File Exports (.tap)</span>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Exports exact CNC drill code (T1M6, G0/G1 modal moves, F3000 plunge, CRLF endings).
+              </p>
+
+              <button id="btn-export-sheet-zip" class="btn-primary" style="width: 100%;">
+                📦 Download Sheet Zip (3 Drill Files)
+              </button>
+              <div style="font-size: 10px; color: var(--text-muted); text-align: center;">
+                One file per colour for the full 300x300mm sheet
+              </div>
+
+              <button id="btn-export-bangles-zip" class="btn-secondary" style="width: 100%; margin-top: 6px;">
+                🗂️ Download Per-Bangle Zip (All Colours)
+              </button>
+              <div style="font-size: 10px; color: var(--text-muted); text-align: center;">
+                Files named B01_Gold_2.4.tap, B04_Green_2.4.tap, etc.
+              </div>
+            </div>
+
+            <!-- CorelDRAW SVG Export -->
+            <div class="panel-card">
+              <span class="card-title">CorelDRAW Vector Guide</span>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                300x300 mm SVG with 0.85 mm radius circles, hierarchically grouped as B01 &gt; B01_Green_2.4 for laser and plotter cutting.
+              </p>
+              <button id="btn-export-svg" class="btn-secondary" style="width: 100%;">
+                🎨 Export CorelDRAW SVG (.svg)
+              </button>
+            </div>
+
+            <!-- Project JSON Save & Load -->
+            <div class="panel-card">
+              <span class="card-title">Project File Storage</span>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button id="btn-save-json" class="btn-secondary">
+                  💾 Save .json
+                </button>
+                <input type="file" id="load-json-input" accept=".json" style="display: none;" />
+                <button id="btn-load-json" class="btn-secondary">
+                  📂 Open .json
+                </button>
+              </div>
+            </div>
+
+            <!-- CNC Machine Time & Stone BOM -->
+            <div class="panel-card">
+              <span class="card-title">Estimated Drill Time & BOM</span>
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Feedrate:</span>
+                  <strong>F3000 mm/min (Plunge)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Est. Machine Run Time:</span>
+                  <strong id="bom-drill-time" style="color: var(--accent-gold);">~1h 15m</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Gross Stone Units (144/gr):</span>
+                  <strong id="bom-gross-units">~101 Gross</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 5: Known CNC Limits & Precautions -->
+          <div id="tab-limits" class="sidebar-tab-content" style="display: none;">
+            <div class="limits-callout">
+              <div class="limits-title">
+                <span>⚠️</span>
+                <span>Known CNC Machining Limits</span>
+              </div>
+              <ul class="limits-list">
+                <li><strong>Large gold petal stones are placed by hand and have no holes.</strong> Bangles 4 and 15 feature empty cutouts reserved for manual gem setting.</li>
+                <li><strong>The tool places only 1.7 mm stones (SS 4.5)</strong>, so fine detail such as thin gold wire is not reproduced.</li>
+                <li><strong>Run a test file on scrap material before real production.</strong> Check spindle clearance, coordinate origin, and workpiece clamping.</li>
+              </ul>
+            </div>
+
+            <div class="panel-card" style="margin-top: 10px;">
+              <span class="card-title">Keyboard Shortcuts</span>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
+                <div><kbd>P</kbd> Paint</div>
+                <div><kbd>E</kbd> Erase</div>
+                <div><kbd>F</kbd> Fill Hex Area</div>
+                <div><kbd>L</kbd> Line Tool</div>
+                <div><kbd>R</kbd> Rectangle</div>
+                <div><kbd>I</kbd> Eyedropper</div>
+                <div><kbd>1</kbd> Green Zircon</div>
+                <div><kbd>2</kbd> White Zircon</div>
+                <div><kbd>3</kbd> Gold Zircon</div>
+                <div><kbd>4</kbd> Ruby Zircon</div>
+                <div><kbd>Ctrl+Z</kbd> Undo</div>
+                <div><kbd>Ctrl+Y</kbd> Redo</div>
+                <div><kbd>Space</kbd> Pan Canvas</div>
+                <div><kbd>+</kbd> / <kbd>-</kbd> Zoom In/Out</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </main>
+
+      <!-- Modal Dialog Container (for Resize prompt etc.) -->
+      <div id="modal-container" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+          <h3 id="modal-title" class="modal-title">Resize Bangle Sheet</h3>
+          <p id="modal-message" class="modal-body">
+            You changed the bangle size. Keep the existing stones and resize, or start with an empty band at the new size.
+          </p>
+          <div class="modal-actions">
+            <button id="modal-btn-cancel" class="btn-secondary">Cancel</button>
+            <button id="modal-btn-keep" class="btn-secondary">Keep Stones &amp; Resize</button>
+            <button id="modal-btn-blank" class="btn-primary">Start blank</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comprehensive Download & Export Center Modal -->
+      <div id="download-modal-container" class="modal-backdrop" style="display: none;">
+        <div class="modal-card" style="max-width: 520px;">
+          <div class="card-title-row">
+            <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+              <span>⬇️</span>
+              <span>Download &amp; Export Center</span>
+            </h3>
+            <button id="btn-close-download-modal" class="btn-bangle-action" style="font-size: 16px; cursor: pointer;">✕</button>
+          </div>
+          <p class="modal-body" style="margin-bottom: 0;">
+            Choose your desired format to download your bangle stone design:
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; max-height: 440px; overflow-y: auto; padding-right: 4px;">
+            <!-- Format 1: Image PNG -->
+            <div class="panel-card" style="background: var(--bg-surface); border: 1px solid var(--accent-gold);">
+              <div class="card-title-row">
+                <span class="card-title" style="color: var(--accent-gold);">📸 Image Format (.png)</span>
+                <span class="brand-tag">High-Res</span>
+              </div>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Print-ready 2400×2400 px graphic of the 300×300 mm sheet with jewel facets, rulers, and stone counts.
+              </p>
+              <button id="modal-btn-download-png" class="btn-primary" style="width: 100%; cursor: pointer;">
+                📸 Download Image (.png)
+              </button>
+            </div>
+
+            <!-- Format 2: CNC Drill .TAP Files -->
+            <div class="panel-card" style="background: var(--bg-surface);">
+              <div class="card-title-row">
+                <span class="card-title">⚙️ CNC Drill Code (.tap)</span>
+                <span class="brand-tag" style="background: rgba(16, 98, 56, 0.2); color: #2ea043; border-color: rgba(46, 160, 67, 0.4);">G-Code</span>
+              </div>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Modal G0/G1 drill files with F3000 plunge feed and CRLF line endings for your CNC drilling machine.
+              </p>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <button id="modal-btn-tap-gold" class="btn-secondary" style="color: var(--accent-gold); font-weight: 600; cursor: pointer;">
+                  📥 Sheet Gold (.tap)
+                </button>
+                <button id="modal-btn-tap-white" class="btn-secondary" style="font-weight: 600; cursor: pointer;">
+                  📥 Sheet White (.tap)
+                </button>
+                <button id="modal-btn-tap-green" class="btn-secondary" style="color: #2ea043; font-weight: 600; cursor: pointer;">
+                  📥 Sheet Green (.tap)
+                </button>
+                <button id="modal-btn-tap-ruby" class="btn-secondary" style="color: #e11d48; font-weight: 600; cursor: pointer;">
+                  📥 Sheet Ruby (.tap)
+                </button>
+                <button id="modal-btn-tap-sel" class="btn-secondary" style="font-weight: 600; cursor: pointer;">
+                  📥 Active Bangle (.tap)
+                </button>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
+                <button id="modal-btn-zip-sheet" class="btn-secondary" style="font-weight: 600; cursor: pointer;">
+                  📦 Sheet Zip (All Colours)
+                </button>
+                <button id="modal-btn-zip-bangles" class="btn-secondary" style="font-weight: 600; cursor: pointer;">
+                  🗂️ Per-Bangle Zip (.tap)
+                </button>
+              </div>
+            </div>
+
+            <!-- Format 3: CorelDRAW SVG -->
+            <div class="panel-card" style="background: var(--bg-surface);">
+              <div class="card-title-row">
+                <span class="card-title">🎨 Vector CAD (.svg)</span>
+                <span class="brand-tag">CorelDRAW</span>
+              </div>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                300×300 mm vector drawing with 0.85 mm radius circles grouped by bangle and colour.
+              </p>
+              <button id="modal-btn-download-svg" class="btn-secondary" style="width: 100%; cursor: pointer;">
+                🎨 Download CorelDRAW SVG (.svg)
+              </button>
+            </div>
+
+            <!-- Format 4: Project JSON -->
+            <div class="panel-card" style="background: var(--bg-surface);">
+              <div class="card-title-row">
+                <span class="card-title">💾 Project Backup (.json)</span>
+                <span class="brand-tag">RLE Encoded</span>
+              </div>
+              <p style="font-size: 11px; color: var(--text-secondary);">
+                Compact run-length encoded project state that can be re-opened in any browser anytime.
+              </p>
+              <button id="modal-btn-download-json" class="btn-secondary" style="width: 100%; cursor: pointer;">
+                💾 Save Project File (.json)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Module Application -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
