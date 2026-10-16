@@ -148,7 +148,8 @@ const brassSizeSelect = document.getElementById('brass-size-select');
 const brassLengthValue = document.getElementById('brass-length-value');
 const btnUseBrassGrid = document.getElementById('btn-use-brass-grid');
 const mobileMenuButton = document.getElementById('btn-mobile-menu');
-const mobileMenuCloseButton = document.getElementById('btn-mobile-menu-close');
+const mobileMenuIcon = document.getElementById('mobile-menu-icon');
+const mobileMenuLabel = document.getElementById('mobile-menu-label');
 const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
 const mobileSidebar = document.getElementById('mobile-sidebar');
 const orientationAssist = document.getElementById('orientation-assist');
@@ -267,13 +268,16 @@ function setMobileMenuOpen(open) {
   const shouldOpen = Boolean(open && isMobile);
   document.getElementById('app').classList.toggle('mobile-menu-open', shouldOpen);
   mobileMenuButton.setAttribute('aria-expanded', String(shouldOpen));
+  mobileMenuButton.setAttribute('aria-label', shouldOpen ? 'Hide sidebar' : 'Show sidebar');
+  mobileMenuButton.title = shouldOpen ? 'Hide sidebar' : 'Show sidebar';
+  mobileMenuIcon.textContent = shouldOpen ? '×' : '☰';
+  mobileMenuLabel.textContent = shouldOpen ? 'Hide' : 'Menu';
   mobileSidebar.setAttribute('aria-hidden', String(isMobile && !shouldOpen));
   if (shouldOpen) mobileSidebar.querySelector('.tab-btn')?.focus();
   else if (isMobile) mobileMenuButton.focus();
 }
 
 mobileMenuButton.addEventListener('click', () => setMobileMenuOpen(mobileMenuButton.getAttribute('aria-expanded') !== 'true'));
-mobileMenuCloseButton.addEventListener('click', () => setMobileMenuOpen(false));
 mobileMenuBackdrop.addEventListener('click', () => setMobileMenuOpen(false));
 mobileSidebar.addEventListener('keydown', event => {
   if (event.key === 'Escape') setMobileMenuOpen(false);

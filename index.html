@@ -57,6 +57,10 @@
         </div>
       </header>
 
+      <button id="btn-mobile-menu" class="mobile-menu-button" type="button" aria-expanded="false" aria-controls="mobile-sidebar" aria-label="Show sidebar">
+        <span id="mobile-menu-icon" aria-hidden="true">☰</span><span id="mobile-menu-label">Menu</span>
+      </button>
+
       <!-- Main Workspace -->
       <main class="main-workspace">
         <!-- Left Tool Rail -->
@@ -126,7 +130,6 @@
         <!-- Center Canvas Viewport -->
         <section class="canvas-viewport" id="viewport-container" aria-label="Stone setting canvas">
           <canvas id="bangle-canvas" tabindex="-1" aria-label="Bangle stone design canvas"></canvas>
-          <button id="btn-mobile-menu" class="mobile-menu-button" type="button" aria-expanded="false" aria-controls="mobile-sidebar">☰ <span>Menu</span></button>
 
           <!-- Floating Precision HUD -->
           <div class="floating-hud">
@@ -173,7 +176,6 @@
               <button class="tab-btn" data-tab="tab-export" role="tab" aria-selected="false">Export</button>
               <button class="tab-btn" data-tab="tab-limits" role="tab" aria-selected="false">CNC Info</button>
             </nav>
-            <button id="btn-mobile-menu-close" class="mobile-menu-close" type="button" aria-label="Hide sidebar" title="Hide sidebar"><span aria-hidden="true">×</span> Hide</button>
           </div>
 
           <!-- Tab 1: Layout & Bangles -->

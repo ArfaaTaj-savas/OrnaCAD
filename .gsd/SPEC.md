@@ -101,7 +101,7 @@ Keep the browser based bangle design editor reliable when creating bangles and v
 - [x] Installed app manifest requests landscape orientation.
 - [x] Touch devices in portrait receive an accessible landscape prompt with automatic, manual, and continue-in-portrait paths.
 - [x] Touch devices in landscape use a full-height canvas with compact tool rail and sidebar.
-- [x] Phone settings tabs are hidden behind a Menu button and open in a dismissible side drawer with an in-panel **× Hide** button.
+- [x] Phone settings tabs are hidden behind a persistent Menu/Hide toggle button and open in a dismissible side drawer.
 - [x] `npm test` and `npm run build` succeed.
 
 **Verification evidence:** `npm test` exit code 0. `npm run build` exit code 0. Mobile drawer and orientation behavior were reviewed in the responsive rules and event wiring; an in-app browser screenshot could not be captured because local preview URLs are unreachable in that browser.
