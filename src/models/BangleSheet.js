@@ -85,6 +85,7 @@ export class BangleSheet {
     // Hand-Set Fancy Stones Library State
     this.shapes = []; // Array of { id, type, x, y, length, width, rotation, flipX, flipY }
     this.stoneSizes = JSON.parse(JSON.stringify(DEFAULT_STONE_SIZES));
+    this.allowStoneResizing = false;
     this.clearanceMm = DEFAULT_CLEARANCE_MM;
     this.selectedShapeId = null;
     this._shapeGeometryRevision = 0;
@@ -727,6 +728,7 @@ export class BangleSheet {
       gap: this.gap,
       clearanceMm: this.clearanceMm,
       stoneSizes: this.stoneSizes,
+      allowStoneResizing: !!this.allowStoneResizing,
       shapes: (this.shapes || []).map(s => ({
         id: s.id,
         type: s.type,
@@ -752,6 +754,7 @@ export class BangleSheet {
   static fromJSON(jsonObj) {
     const sheet = new BangleSheet(jsonObj.size || '2.4', jsonObj.gap ?? DEFAULT_GAP_MM);
     sheet.clearanceMm = (jsonObj.clearanceMm !== undefined) ? jsonObj.clearanceMm : DEFAULT_CLEARANCE_MM;
+    sheet.allowStoneResizing = jsonObj.allowStoneResizing === true;
     sheet.stoneSizes = jsonObj.stoneSizes
       ? JSON.parse(JSON.stringify(jsonObj.stoneSizes))
       : JSON.parse(JSON.stringify(DEFAULT_STONE_SIZES));
@@ -798,6 +801,7 @@ export class BangleSheet {
     const copy = new BangleSheet(this.sizeKey, this.gap);
     copy.selectedBangleIndex = this.selectedBangleIndex;
     copy.clearanceMm = this.clearanceMm;
+    copy.allowStoneResizing = !!this.allowStoneResizing;
     copy.stoneSizes = JSON.parse(JSON.stringify(this.stoneSizes));
     copy.selectedShapeId = this.selectedShapeId;
     copy.shapes = (this.shapes || []).map(s => ({

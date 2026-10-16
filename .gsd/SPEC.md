@@ -78,6 +78,19 @@ Keep the browser based bangle design editor reliable when creating bangles and v
 - [x] JSON round-trip and legacy files without shapes work; all shape edit operations can undo and redo.
 - [x] `npm test` covers mask/restore, exports, geometry, persistence, compatibility, and undo/redo; `npm run build` succeeds.
 
+## Stone resize lock (2026-10-16)
+
+17. Add an off-by-default switch to control all hand-set stone dimension editing. When off, library dimension inputs, selected-shape length/width fields, and canvas resize handles are unavailable; movement and rotation remain available. When on, all size editing is enabled.
+18. Persist the switch in project JSON and undo/redo snapshots; legacy projects default to locked sizing.
+
+**Additional Success Criteria**
+- [x] New and legacy sheets default to locked sizing; JSON round-trip, clone, undo, and redo preserve the switch state.
+- [x] The off state disables dimension controls and suppresses canvas resize handles and drag-resize; rotation and movement still work.
+- [x] The on state enables dimension controls and resize handles; direct dimension updates are rejected while off.
+- [x] `npm test` and `npm run build` succeed.
+
+**Verification evidence:** `npm test` exit code 0, including locked sizing, legacy JSON, clone/round-trip, and switch undo/redo regression coverage. `npm run build` exit code 0. Browser screenshot verification was unavailable: the app did not load in the in-app browser (`ERR_CONNECTION_TIMED_OUT` on 127.0.0.1:5174; existing 5173 tab reported connection refused).
+
 **Verification evidence:**
 - `npm test` exit code 0; hand-set acceptance passed: 3120 filled → 3087 under the Triangle mask → 3120 restored after moving it away; TAP/SVG masks, exact Pear bounds, 90° Rectangle bounds, JSON and legacy load, and undo/redo passed.
 - `npm run build` exit code 0. The in-app browser inspection was blocked by the browser URL security policy during this turn.

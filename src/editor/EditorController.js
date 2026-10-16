@@ -182,7 +182,10 @@ export class EditorController {
       let isHandleHit = false;
       if (!directHit && priorSelection) {
         const box = getShapeBoundingBox(priorSelection);
-        const handles = [[box.minX, box.minY], [box.maxX, box.minY], [box.maxX, box.maxY], [box.minX, box.maxY], [priorSelection.x, box.minY - 10]];
+        const handles = [
+          ...(this.sheet.allowStoneResizing ? [[box.minX, box.minY], [box.maxX, box.minY], [box.maxX, box.maxY], [box.minX, box.maxY]] : []),
+          [priorSelection.x, box.minY - 10]
+        ];
         isHandleHit = handles.some(([x, y]) => Math.hypot(screenX - this.renderer.worldToScreen(x, y).x, screenY - this.renderer.worldToScreen(x, y).y) <= 10);
       }
       const hitShape = directHit || (isHandleHit ? priorSelection : null);
@@ -195,7 +198,9 @@ export class EditorController {
         const corners = [[box.minX, box.minY], [box.maxX, box.minY], [box.maxX, box.maxY], [box.minX, box.maxY]];
         const d2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
         const screen = { x: screenX, y: screenY };
-        const cornerIndex = corners.findIndex(([x, y]) => d2(screen, this.renderer.worldToScreen(x, y)) <= 10 ** 2);
+        const cornerIndex = this.sheet.allowStoneResizing
+          ? corners.findIndex(([x, y]) => d2(screen, this.renderer.worldToScreen(x, y)) <= 10 ** 2)
+          : -1;
         const rotateHandle = this.renderer.worldToScreen(hitShape.x, box.minY - 10);
         if (d2(screen, rotateHandle) <= 10 ** 2) {
           this.shapeDragMode = 'rotate';
@@ -452,6 +457,7 @@ export class EditorController {
   updateSelectedShape(props) {
     const id = this.sheet.selectedShapeId;
     if (!id) return false;
+    if (!this.sheet.allowStoneResizing && (Object.hasOwn(props, 'length') || Object.hasOwn(props, 'width'))) return false;
     this.saveSnapshot();
     const shape = this.sheet.shapes.find(s => s.id === id);
     const next = { ...props };

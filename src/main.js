@@ -115,6 +115,7 @@ const motifOrientation = document.getElementById('motif-orientation');
 const btnRepeatMotif = document.getElementById('btn-repeat-motif');
 const handSetLibrary = document.getElementById('handset-library');
 const stoneSizesTable = document.getElementById('stone-sizes-table');
+const allowStoneResize = document.getElementById('allow-stone-resize');
 const snapStoneCenters = document.getElementById('snap-stone-centers');
 const snapStoneRotation = document.getElementById('snap-stone-rotation');
 const stoneClearance = document.getElementById('stone-clearance');
@@ -279,6 +280,8 @@ function syncControlsFromState() {
   brushSizeLabel.textContent = `${editor.brushSize} st`;
   snapStoneCenters.checked = editor.snapStoneCenters;
   snapStoneRotation.checked = editor.snapStoneRotation;
+  allowStoneResize.checked = editor.sheet.allowStoneResizing;
+  allowStoneResize.setAttribute('aria-checked', String(allowStoneResize.checked));
   stoneClearance.value = editor.sheet.clearanceMm;
   renderHandSetLibrary();
   renderStoneProperties();
@@ -301,9 +304,10 @@ function renderHandSetLibrary() {
   });
   stoneSizesTable.innerHTML = Object.values(HAND_SET_STONE_TYPES).map(type => {
     const s = editor.sheet.stoneSizes[type];
-    return `<div class="stone-size-row"><span>${type}</span><input type="number" min="0.1" step="0.1" value="${s.length}" data-stone-size="${type}" data-axis="length" aria-label="${type} length mm"><span>×</span><input type="number" min="0.1" step="0.1" value="${s.width}" data-stone-size="${type}" data-axis="width" aria-label="${type} width mm"></div>`;
+    return `<div class="stone-size-row"><span>${type}</span><input type="number" min="0.1" step="0.1" value="${s.length}" data-stone-size="${type}" data-axis="length" aria-label="${type} length mm" ${editor.sheet.allowStoneResizing ? '' : 'disabled'}><span>×</span><input type="number" min="0.1" step="0.1" value="${s.width}" data-stone-size="${type}" data-axis="width" aria-label="${type} width mm" ${editor.sheet.allowStoneResizing ? '' : 'disabled'}></div>`;
   }).join('');
   stoneSizesTable.querySelectorAll('input').forEach(input => input.addEventListener('change', () => {
+    if (!editor.sheet.allowStoneResizing) { renderHandSetLibrary(); return; }
     const type = input.dataset.stoneSize, axis = input.dataset.axis, value = Number(input.value);
     if (!(value > 0)) { input.value = editor.sheet.stoneSizes[type][axis]; return; }
     editor.saveSnapshot(); editor.sheet.stoneSizes[type][axis] = value; editor.saveSnapshot();
@@ -315,7 +319,7 @@ function renderStoneProperties() {
   const shape = editor.sheet.shapes.find(s => s.id === editor.sheet.selectedShapeId);
   shapeFieldIds.forEach((id, i) => {
     const input = document.getElementById(id); input.value = shape ? [shape.x, shape.y, shape.length, shape.width, shape.rotation][i] : '';
-    input.disabled = !shape;
+    input.disabled = !shape || ((i === 2 || i === 3) && !editor.sheet.allowStoneResizing);
   });
   ['shape-delete', 'shape-mirror', 'shape-repeat', 'shape-ring'].forEach(id => { document.getElementById(id).disabled = !shape; });
 }
@@ -500,6 +504,14 @@ btnRepeatMotif.addEventListener('click', () => {
 
 snapStoneCenters.addEventListener('change', () => { editor.snapStoneCenters = snapStoneCenters.checked; });
 snapStoneRotation.addEventListener('change', () => { editor.snapStoneRotation = snapStoneRotation.checked; });
+allowStoneResize.addEventListener('change', () => {
+  editor.saveSnapshot();
+  editor.sheet.allowStoneResizing = allowStoneResize.checked;
+  allowStoneResize.setAttribute('aria-checked', String(allowStoneResize.checked));
+  editor.saveSnapshot();
+  renderHandSetLibrary();
+  renderStoneProperties();
+});
 stoneClearance.addEventListener('change', () => {
   const value = Math.max(0.5, Math.min(1.5, Number(stoneClearance.value) || 0.85));
   editor.saveSnapshot(); editor.sheet.clearanceMm = value; editor.sheet.invalidateShapeMask(); editor.saveSnapshot(); stoneClearance.value = value; updateCountsAndMeter();

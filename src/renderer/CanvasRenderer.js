@@ -361,7 +361,9 @@ export class CanvasRenderer {
         ctx.setLineDash([2, 2]); ctx.strokeStyle = 'rgba(255,213,107,.65)'; ctx.lineWidth = 1;
         const topLeft = this.worldToScreen(box.minX, box.minY), bottomRight = this.worldToScreen(box.maxX, box.maxY);
         ctx.strokeRect(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y); ctx.setLineDash([]);
-        for (const [x, y] of corners) { const q = this.worldToScreen(x, y); ctx.fillStyle = '#ffd56b'; ctx.fillRect(q.x - 4, q.y - 4, 8, 8); ctx.strokeStyle = '#252a30'; ctx.strokeRect(q.x - 4, q.y - 4, 8, 8); }
+        if (sheet.allowStoneResizing) {
+          for (const [x, y] of corners) { const q = this.worldToScreen(x, y); ctx.fillStyle = '#ffd56b'; ctx.fillRect(q.x - 4, q.y - 4, 8, 8); ctx.strokeStyle = '#252a30'; ctx.strokeRect(q.x - 4, q.y - 4, 8, 8); }
+        }
         const rotatePoint = this.worldToScreen(shape.x, box.minY - 10);
         const topMid = this.worldToScreen(shape.x, box.minY);
         ctx.strokeStyle = '#ffd56b'; ctx.beginPath(); ctx.moveTo(topMid.x, topMid.y); ctx.lineTo(rotatePoint.x, rotatePoint.y); ctx.stroke();

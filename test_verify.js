@@ -276,9 +276,11 @@ if (Math.abs(rect0.width - rect90.height) > 1e-6 || Math.abs(rect0.height - rect
 handSheet.stoneSizes[HAND_SET_STONE_TYPES.PEAR] = { length: 12, width: 6 };
 handSheet.clearanceMm = 1.1;
 const handReload = BangleSheet.fromJSON(JSON.parse(JSON.stringify(handSheet.toJSON())));
-if (handReload.shapes.length !== 2 || handReload.clearanceMm !== 1.1 || handReload.stoneSizes.Pear.length !== 12) throw new Error('Hand-set settings did not survive JSON round trip');
+if (handReload.shapes.length !== 2 || handReload.clearanceMm !== 1.1 || handReload.stoneSizes.Pear.length !== 12 || handReload.allowStoneResizing !== false) throw new Error('Hand-set settings or default locked sizing did not survive JSON round trip');
 const legacyHandReload = BangleSheet.fromJSON({ size: '2.4', bangles: [{ rows: 1, rle: '01' }] });
-if (legacyHandReload.shapes.length !== 0) throw new Error('Legacy project without shapes failed to open');
+if (legacyHandReload.shapes.length !== 0 || legacyHandReload.allowStoneResizing !== false) throw new Error('Legacy project without shapes failed to open with locked sizing');
+handSheet.allowStoneResizing = true;
+if (!handSheet.clone().allowStoneResizing || !BangleSheet.fromJSON(handSheet.toJSON()).allowStoneResizing) throw new Error('Enabled stone resizing did not survive clone/JSON persistence');
 const svgWithStones = generateSvgForCorelDraw(handSheet);
 if (!svgWithStones.includes('id="HandSet_Stones"') || !svgWithStones.includes('HandSet_1_Triangle')) throw new Error('SVG missing hand-set stone group/path');
 const noShapeOneHole = new BangleSheet('2.4'); noShapeOneHole.addBangle(1, -1); noShapeOneHole.setStone(0, 0, 0, STONE_CELL.GOLD);
@@ -292,6 +294,12 @@ const historyEditor = new EditorController(historySheet, { previewStones: [], sc
 const histShape = historyEditor.placeHandSetStone(HAND_SET_STONE_TYPES.DIAMOND, 100, 100);
 if (!historyEditor.undo() || historyEditor.sheet.shapes.length !== 0 || !historyEditor.redo() || historyEditor.sheet.shapes.length !== 1) throw new Error('Hand-set place undo/redo failed');
 historyEditor.sheet.selectedShapeId = historyEditor.sheet.shapes[0].id;
+const lockedLength = historyEditor.sheet.shapes[0].length;
+if (historyEditor.updateSelectedShape({ length: lockedLength + 2 }) || historyEditor.sheet.shapes[0].length !== lockedLength) throw new Error('Locked stone dimensions accepted a direct size update');
+const lockedX = historyEditor.sheet.shapes[0].x, lockedRotation = historyEditor.sheet.shapes[0].rotation;
+if (!historyEditor.updateSelectedShape({ x: lockedX + 2 }) || !historyEditor.updateSelectedShape({ rotation: lockedRotation + 15 }) || historyEditor.sheet.shapes[0].x !== lockedX + 2 || historyEditor.sheet.shapes[0].rotation !== lockedRotation + 15) throw new Error('Moving or rotating a locked-size stone was disabled');
+historyEditor.saveSnapshot(); historyEditor.sheet.allowStoneResizing = true; historyEditor.saveSnapshot();
+if (!historyEditor.undo() || historyEditor.sheet.allowStoneResizing || !historyEditor.redo() || !historyEditor.sheet.allowStoneResizing) throw new Error('Stone resize switch undo/redo failed');
 const oldX = historyEditor.sheet.shapes[0].x; historyEditor.updateSelectedShape({ x: oldX + 5 });
 if (!historyEditor.undo() || historyEditor.sheet.shapes[0].x !== oldX || !historyEditor.redo() || historyEditor.sheet.shapes[0].x !== oldX + 5) throw new Error('Hand-set move undo/redo failed');
 historyEditor.updateSelectedShape({ length: 14 });
@@ -305,7 +313,7 @@ if (!historyEditor.undo() || historyEditor.sheet.stoneSizes.Pear.length === 12 |
 historyEditor.saveSnapshot(); historyEditor.sheet.clearanceMm = 1.2; historyEditor.saveSnapshot();
 if (!historyEditor.undo() || historyEditor.sheet.clearanceMm === 1.2 || !historyEditor.redo() || historyEditor.sheet.clearanceMm !== 1.2) throw new Error('Hand-set clearance undo/redo failed');
 clearTimeout(historyEditor.autosaveTimer);
-console.log(`Hand-set acceptance verified: mask ${beforeMask}→${afterMask}→${restoredMask}, TAP/SVG masks, pear bounds, 90° rotation, JSON/legacy, and undo/redo`);
+console.log(`Hand-set acceptance verified: mask ${beforeMask}→${afterMask}→${restoredMask}, TAP/SVG masks, pear bounds, 90° rotation, JSON/legacy, resize lock/persistence, and undo/redo`);
 
 // 6. The preset gallery is intentionally empty; designs start blank.
 import('./src/sampleDesign.js').then(({ SAMPLE_PRESETS }) => {
